@@ -27,7 +27,9 @@ export default defineConfig({
           if (/[\\/]node_modules[\\/](recharts|d3-|victory-|decimal\.js-light|internmap)/.test(id))
             return 'chart-vendor';
           if (/[\\/]node_modules[\\/]@supabase[\\/]/.test(id)) return 'supabase-vendor';
-          return 'vendor';
+          // Everything else stays with its importer — a catch-all 'vendor'
+          // chunk creates circular references with the split vendor chunks.
+          return undefined;
         },
       },
     },
