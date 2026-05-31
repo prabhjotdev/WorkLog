@@ -4,6 +4,7 @@ import { isWithinInterval, subDays } from 'date-fns';
 import { useAuth } from '@/hooks/useAuth';
 import { useTasks } from '@/hooks/useTasks';
 import { useSprints } from '@/hooks/useSprints';
+import { useGaps } from '@/hooks/useGaps';
 import { MetricCard } from '@/components/analytics/MetricCard';
 import { VelocityBar } from '@/components/sprints/VelocityBar';
 import { SprintStatusBadge } from '@/components/sprints/SprintStatusBadge';
@@ -16,11 +17,13 @@ export default function DashboardPage() {
   const { profile } = useAuth();
   const { tasks, status: taskStatus, loadTasks } = useTasks();
   const { sprints, loadSprints } = useSprints();
+  const { gaps, loadGaps } = useGaps();
 
   useEffect(() => {
     loadTasks();
     loadSprints();
-  }, [loadTasks, loadSprints]);
+    loadGaps();
+  }, [loadTasks, loadSprints, loadGaps]);
 
   const metrics = useMemo(() => {
     const weekAgo = subDays(new Date(), 7);
@@ -33,8 +36,9 @@ export default function DashboardPage() {
     const blocked = tasks.filter((t) => t.status === 'blocked').length;
     const inProgress = tasks.filter((t) => t.status === 'in_progress').length;
     const openTasks = tasks.filter((t) => t.status !== 'done').length;
-    return { doneThisWeek, blocked, inProgress, openTasks };
-  }, [tasks]);
+    const openGaps = gaps.filter((g) => !g.resolved).length;
+    return { doneThisWeek, blocked, inProgress, openTasks, openGaps };
+  }, [tasks, gaps]);
 
   const activeSprint = useMemo(
     () => sprints.find((s) => s.status === 'active') ?? null,
@@ -68,7 +72,7 @@ export default function DashboardPage() {
       ) : (
         <>
           {/* Metrics */}
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
             <MetricCard
               label="Completed this week"
               value={metrics.doneThisWeek}
@@ -106,6 +110,16 @@ export default function DashboardPage() {
               icon={
                 <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                </svg>
+              }
+            />
+            <MetricCard
+              label="Open knowledge gaps"
+              value={metrics.openGaps}
+              accent="amber"
+              icon={
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                 </svg>
               }
             />

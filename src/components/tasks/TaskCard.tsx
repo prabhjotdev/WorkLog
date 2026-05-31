@@ -1,7 +1,7 @@
 import { clsx } from 'clsx';
 import { useAppDispatch, useAppSelector } from '@/hooks/useAppDispatch';
 import { useTasks } from '@/hooks/useTasks';
-import { openTaskModal } from '@/store/uiSlice';
+import { openTaskModal, openGapModal } from '@/store/uiSlice';
 import { TaskStatusBadge, TaskPriorityBadge } from './TaskStatusBadge';
 import { Badge } from '@/components/shared/Badge';
 import { TASK_STATUSES, TASK_STATUS_LABELS } from '@/lib/constants';
@@ -86,7 +86,7 @@ export function TaskCard({ task }: { task: Task }) {
       )}
 
       {/* Inline status switcher */}
-      <div className="mt-3 flex items-center gap-1.5 border-t border-slate-100 pt-3">
+      <div className="mt-3 flex flex-wrap items-center gap-1.5 border-t border-slate-100 pt-3">
         <span className="mr-1 text-xs text-slate-400">Move to:</span>
         {TASK_STATUSES.filter((s) => s !== task.status).map((s) => (
           <button
@@ -97,6 +97,15 @@ export function TaskCard({ task }: { task: Task }) {
             {TASK_STATUS_LABELS[s]}
           </button>
         ))}
+        {task.status === 'blocked' && (
+          <button
+            onClick={() => dispatch(openGapModal(null))}
+            className="ml-auto rounded-md px-2 py-1 text-xs font-medium text-amber-600 hover:bg-amber-50"
+            title="Log a knowledge gap for this blocker"
+          >
+            Log gap
+          </button>
+        )}
       </div>
     </div>
   );
