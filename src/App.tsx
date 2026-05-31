@@ -1,21 +1,25 @@
-import { useEffect } from 'react';
+import { useEffect, lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { Toaster } from 'react-hot-toast';
 import { store } from '@/store';
 import { supabase } from '@/lib/supabase';
-import { setSession } from '@/store/authSlice';
-import { fetchProfile } from '@/store/authSlice';
+import { setSession, fetchProfile } from '@/store/authSlice';
 import AuthGuard from '@/components/layout/AuthGuard';
 import AppShell from '@/components/layout/AppShell';
-import LoginPage from '@/pages/LoginPage';
-import DashboardPage from '@/pages/DashboardPage';
-import TasksPage from '@/pages/TasksPage';
-import SprintsPage from '@/pages/SprintsPage';
-import SprintPage from '@/pages/SprintPage';
-import AnalyticsPage from '@/pages/AnalyticsPage';
-import GapsPage from '@/pages/GapsPage';
-import ReportPage from '@/pages/ReportPage';
+import { ErrorBoundary } from '@/components/shared/ErrorBoundary';
+import { Spinner } from '@/components/shared/Spinner';
+
+// Route-based code splitting — keeps the initial bundle small and loads heavy
+// pages (e.g. Analytics with Recharts) only when first visited.
+const LoginPage = lazy(() => import('@/pages/LoginPage'));
+const DashboardPage = lazy(() => import('@/pages/DashboardPage'));
+const TasksPage = lazy(() => import('@/pages/TasksPage'));
+const SprintsPage = lazy(() => import('@/pages/SprintsPage'));
+const SprintPage = lazy(() => import('@/pages/SprintPage'));
+const AnalyticsPage = lazy(() => import('@/pages/AnalyticsPage'));
+const GapsPage = lazy(() => import('@/pages/GapsPage'));
+const ReportPage = lazy(() => import('@/pages/ReportPage'));
 
 /**
  * AuthListener lives inside the Provider so it can dispatch to the store,
@@ -32,7 +36,9 @@ function AuthListener() {
     });
 
     // Keep the store in sync with Supabase auth state changes (sign in / sign out / token refresh)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
       store.dispatch(setSession(session));
       if (session) {
         store.dispatch(fetchProfile(session.user.id));
@@ -43,6 +49,14 @@ function AuthListener() {
   }, []);
 
   return null;
+}
+
+function PageFallback() {
+  return (
+    <div className="flex min-h-[60vh] items-center justify-center">
+      <Spinner size="lg" />
+    </div>
+  );
 }
 
 export default function App() {
@@ -57,22 +71,25 @@ export default function App() {
         }}
       />
       <BrowserRouter>
-        <Routes>
-          <Route path="/login" element={<LoginPage />} />
-          <Route element={<AuthGuard />}>
-            <Route element={<AppShell />}>
-              <Route index element={<DashboardPage />} />
-              <Route path="tasks" element={<TasksPage />} />
-              <Route path="sprints" element={<SprintsPage />} />
-              <Route path="sprints/:sprintId" element={<SprintPage />} />
-              <Route path="analytics" element={<AnalyticsPage />} />
-              <Route path="gaps" element={<GapsPage />} />
-              <Route path="report" element={<ReportPage />} />
-            </Route>
-          </Route>
-          {/* Catch-all → dashboard (AuthGuard redirects to /login if unauthenticated) */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+        <ErrorBoundary>
+          <Suspense fallback={<PageFallback />}>
+            <Routes>
+              <Route path="/login" element={<LoginPage />} />
+              <Route element={<AuthGuard />}>
+                <Route element={<AppShell />}>
+                  <Route index element={<DashboardPage />} />
+                  <Route path="tasks" element={<TasksPage />} />
+                  <Route path="sprints" element={<SprintsPage />} />
+                  <Route path="sprints/:sprintId" element={<SprintPage />} />
+                  <Route path="analytics" element={<AnalyticsPage />} />
+                  <Route path="gaps" element={<GapsPage />} />
+                  <Route path="report" element={<ReportPage />} />
+                </Route>
+              </Route>
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </Suspense>
+        </ErrorBoundary>
       </BrowserRouter>
     </Provider>
   );

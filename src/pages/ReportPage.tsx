@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { useTasks } from '@/hooks/useTasks';
 import { useSprints } from '@/hooks/useSprints';
 import { useGaps } from '@/hooks/useGaps';
-import { useAppSelector } from '@/hooks/useAppDispatch';
 import { ReportGenerator } from '@/components/reports/ReportGenerator';
 import { ReportPreview } from '@/components/reports/ReportPreview';
 import { CopyReportButton } from '@/components/reports/CopyReportButton';
@@ -21,7 +20,6 @@ export default function ReportPage() {
   const { tasks, status: taskStatus, loadTasks } = useTasks();
   const { sprints, loadSprints } = useSprints();
   const { gaps, loadGaps } = useGaps();
-  const storesprints = useAppSelector((s) => s.sprints.items);
 
   const [options, setOptions] = useState<ReportOptions>(DEFAULT_OPTIONS);
   const [report, setReport] = useState<string | null>(null);
@@ -63,7 +61,7 @@ export default function ReportPage() {
           {/* Controls */}
           <div className="lg:col-span-1">
             <ReportGenerator
-              sprints={storesprints}
+              sprints={sprints}
               options={options}
               onChange={handleChange}
               onGenerate={handleGenerate}
