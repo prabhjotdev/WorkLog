@@ -57,9 +57,9 @@ export default function ReportPage() {
           <Spinner size="lg" />
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(280px,360px)_1fr]">
           {/* Controls */}
-          <div className="lg:col-span-1">
+          <div>
             <ReportGenerator
               sprints={sprints}
               options={options}
@@ -69,7 +69,7 @@ export default function ReportPage() {
           </div>
 
           {/* Preview */}
-          <div className="lg:col-span-2">
+          <div>
             {report ? (
               <div className="flex flex-col gap-4">
                 <div className="flex items-center justify-between">
