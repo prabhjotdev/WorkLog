@@ -163,6 +163,22 @@ ALTER TABLE sprints        ENABLE ROW LEVEL SECURITY;
 ALTER TABLE tasks          ENABLE ROW LEVEL SECURITY;
 ALTER TABLE knowledge_gaps ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies so this script is safe to re-run
+DROP POLICY IF EXISTS "profiles: select own"  ON profiles;
+DROP POLICY IF EXISTS "profiles: update own"  ON profiles;
+DROP POLICY IF EXISTS "sprints: select own"   ON sprints;
+DROP POLICY IF EXISTS "sprints: insert own"   ON sprints;
+DROP POLICY IF EXISTS "sprints: update own"   ON sprints;
+DROP POLICY IF EXISTS "sprints: delete own"   ON sprints;
+DROP POLICY IF EXISTS "tasks: select own"     ON tasks;
+DROP POLICY IF EXISTS "tasks: insert own"     ON tasks;
+DROP POLICY IF EXISTS "tasks: update own"     ON tasks;
+DROP POLICY IF EXISTS "tasks: delete own"     ON tasks;
+DROP POLICY IF EXISTS "gaps: select own"      ON knowledge_gaps;
+DROP POLICY IF EXISTS "gaps: insert own"      ON knowledge_gaps;
+DROP POLICY IF EXISTS "gaps: update own"      ON knowledge_gaps;
+DROP POLICY IF EXISTS "gaps: delete own"      ON knowledge_gaps;
+
 -- profiles
 CREATE POLICY "profiles: select own"
   ON profiles FOR SELECT USING (auth.uid() = id);
