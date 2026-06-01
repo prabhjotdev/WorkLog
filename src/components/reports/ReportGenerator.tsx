@@ -59,15 +59,16 @@ export function ReportGenerator({ sprints, options, onChange, onGenerate }: Repo
         <p className="mb-2 text-xs font-medium text-slate-500">
           {options.sprintIds.length > 0 ? 'Narrow by date (optional)' : 'Date range'}
         </p>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-col gap-2">
           <Input
             type="date"
+            label="From"
             value={options.dateFrom ?? ''}
             onChange={(e) => onChange({ dateFrom: e.target.value || null })}
           />
-          <span className="text-slate-400">–</span>
           <Input
             type="date"
+            label="Until"
             value={options.dateUntil ?? ''}
             onChange={(e) => onChange({ dateUntil: e.target.value || null })}
           />
